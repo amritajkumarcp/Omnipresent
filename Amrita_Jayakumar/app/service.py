@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 DATABASE = app.config.get("DATABASE_URI","")
 
-# DATABASE = 'database.db'
 THIS_FOLDER = os.path.realpath(os.path.dirname(__file__))
 
 DB_URL = os.path.join(THIS_FOLDER, "../", DATABASE)
@@ -32,7 +31,6 @@ def row_to_dict(cursor: sqlite3.Cursor, row: sqlite3.Row) -> dict:
         data[col[0]] = row[idx]
     return data
 
-    
 
 def get_db( rowbased_access=False):
     try:
@@ -60,9 +58,9 @@ def fetch_users(params = {}):
             conn = conn_response.get("conn", None)
             if conn:
                 curr = conn.cursor()
-                query = 'SELECT * FROM users'
+                query = 'SELECT * FROM users' #to fetch all users
                 if limit and offset:
-                    query += f" limit {str(int(limit))} offset {str(int(offset))}" 
+                    query += f" limit {str(int(limit))} offset {str(int(offset))}" #for pagination
                 users = curr.execute(query).fetchall()
                 log.error(json.dumps(users))
                 close_connection()
@@ -78,32 +76,25 @@ def fetch_users(params = {}):
 def sanitize_user_list(users_list, refresh_country_data=False):
     users_final=[]
     if len(users_list)>0:
-        log.error(users_list)
-        countries_l = countries.get_all_countries(refresh_country_data)
+        #fetch all countries at once
+        countries_l = countries.get_all_countries(refresh_country_data) 
         if countries_l.get("error", True) is False and len(countries_l)>0:
             g._countries_list = countries_l.get("countries_list",[])
         
         empCountryList = map(addCountryInfo, users_list)
-        
-        
-        for user in empCountryList:
-            users_final.append(user)
+        users_final = [ user for user in empCountryList]
     return users_final
 
 def addCountryInfo(emp):
     employee = Employee(id=emp["id"], firstName=emp["firstName"], created=emp["created"], lastName=emp["lastName"], jobTitle=emp["jobTitle"], company=emp["company"], country=emp["country"], dateOfBirth=emp["dateOfBirth"], countryInfo=None, region=None, uid=None)
-    log.error(employee)
     # Get the item from the dictionary/ iterable that is with matching predicate
     countries_list = getattr(g,"_countries_list")
-    log.error(countries_list)
-
     countryInfo = next(filter(lambda c: employee.country in [c.cioc, c.cca2], countries_list), None)
+    
     cInfo = countryInfo.__dict__
-    log.error(cInfo)
+    
     # Take only necessary data from the above item and add it to the employee
-    # Return the employee
     emp.update(cInfo)
-    log.error(emp)
     if emp.get("region","") in app.config.get("REGIONS",[]):
         firstName = emp.get("firstName","")
         lastName = emp.get("lastName","")
@@ -113,7 +104,8 @@ def addCountryInfo(emp):
         if firstName and lastName and dateOfBirth:
             uid = f"{firstName.lower()}{lastName.lower()}{dateOfBirth}"
         emp["uid"] = uid
-  
+        
+    # Return the employee
     return emp
 
 
