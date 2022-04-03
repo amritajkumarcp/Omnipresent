@@ -3,6 +3,7 @@
 
 The following is the folder structure of the application
 
+```
 Omnipresent
 ├───Amrita_Jayakumar
 |   ├───app
@@ -23,6 +24,7 @@ Omnipresent
 |   |───schema.sql
 |   |───uwsgi.ini
 |   |───README.md
+```
 
 FOLDER STRUCTURE EXPLAINED
 
