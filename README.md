@@ -22,29 +22,34 @@ Omnipresent
 |   |───main.py
 |   |───requirements.text
 |   |───schema.sql
+|   |───tests
+│   |   ├───functional
+|   |   |   └───functional_test.py
+│   |   ├───unit
+|   |   |   └───unit_test.py
 |   |───uwsgi.ini
 |   |───README.md
 ```
 
 FOLDER STRUCTURE EXPLAINED
 
-    app/static
+   app/static/init_data.json
 
         Contains the data for initializing database.
 
-    app/__init__.py
+   app/__init__.py
 
         Contains the initializations required for the app
 
-    app/service.py
+   app/service.py
 
         Contains the business Logic and DB connections
 
-    app/views.py
+   app/views.py
 
         Contains the endpoint defined for the API
 
-    external_api/countries.py
+   external_api/countries.py
 
         Contains the API call to fetch the country specific information from https://restcountries.com/ as required in the task. Have consumed two endpoints
 
@@ -52,15 +57,15 @@ FOLDER STRUCTURE EXPLAINED
         2. https://restcountries.com/v2/alpha/{code} (alternatively uses both endpoints as and when required.)
 
 
-    config.py
+   config.py
 
-        Contains all configurables that are used in the application. 
+        Contains all configurables that are used in the application. Have separate configuration available for each environment like DEV, PRODUCTION tESTING etc which can beustilized accordingly.
         
         DATABASE_URI, REGIONS, COUNTRIES_API_URL, CACHE_TYPE, CACHE_DEFAULT_TIMEOUT have been added to the config files and each configuration have been named to be self explanatory.
 
         The regions which require additional identifier for a user has been configured here as a list so that there is a provision to add more of such regions that might need this extra identifier in the future can be added here. The key for the additional identifier in the return json will be "uid".
 
-    Dockerfile Explained:
+   Dockerfile Explained:
 
         FROM python:3.8-alpine : Docker allows us to inherit existing images and hence we can reuse a Python image and install it in our Docker image. Alpine is a lightweight Linux distro that will serve as the OS on which we install our image
 
@@ -93,48 +98,56 @@ FOLDER STRUCTURE EXPLAINED
         docker-compose build
         docker-compose up -d
 
-    init_db.py
+   init_db.py
 
         This script does the following:
             1. creates a database file in the docker container named database.db
             2. will read through the schema.sql, Drop any existing table with the same name and create the Table to oncemore to user data
             3. will read through init_data.json and insert the data into the newly created table.
 
-    main.py
+   main.py
 
         entry point to the application
 
-    requirements.txt
+   requirements.txt
 
         contains all the dependencies required for the application to run successfully.
         All the dependencies are pip installed into the docker container during build.
 
-    schema.sql
+   schema.sql
 
         container the SQL code for dropping any existing table with the same name and created a new table to hold user/employee data.
 
-    uwsgi.ini
+   uwsgi.ini
 
         contains the wsgi configurations required to deploy the application.
 
 
 API ENDPOINTS EXPLAINED:
 
-http://localhost:5000/users
-METHODS: GET, POST
-GET:
-    fetches all users in the Database with all country specific details fetched from the countries API and the additonal Identifier for the users in the regions of Europe and Asia.
+      http://localhost:5000/users
+      METHODS: GET
+      
+      GET:
+          fetches all users in the Database with all country specific details fetched from the countries API and the additonal Identifier for the users in the regions of Europe and Asia.
 
-    If pagination is required, then the offset and limit needs to be passed in the URL.
-    GET http://localhost:5000/users?limit=3&offset=0 - fetches first 3 user records
-    GET http://localhost:5000/users?limit=3&offset=3 - fetches next 3 user records and so on..
+      If pagination is required, then the offset and limit needs to be passed in the URL.
+         GET http://localhost:5000/users?limit=3&offset=0 - fetches first 3 user records
+         GET http://localhost:5000/users?limit=3&offset=3 - fetches next 3 user records and so on..
 
-    The GET request will fetch all countries from the countries API and cache it for 24 hours. SimpleCache from flask  has been chosen to cache this data. The country data doesnt look like changing always and hence the 24hrs timeout was chosen.
+      The GET request will fetch all countries from the countries API and cache it for 24 hours. SimpleCache from flask has been chosen to cache this data.  The country data doesnt look like changing always and hence the 24hrs timeout was chosen.
 
-    An option to force fetch the country information have been made and can be achieved by htting the following:
-    GET http://localhost:5000/users?refresh=true
+      An option to force fetch the country information have been made and can be achieved by htting the following:
+         GET http://localhost:5000/users?refresh=true
 
+AREAS OF IMPROVEMENT:
 
+1. Can use token based authentication to secure the API (JWT implementation. Couldn't do it due to shortage of time)
+2. Can use Redis for caching
+
+TESTS
+
+    Test scripts for functional and unit test have been added to the repository but could not work more on it due to limited time.
 
 
 
