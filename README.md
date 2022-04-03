@@ -125,24 +125,29 @@ FOLDER STRUCTURE EXPLAINED
 
 API ENDPOINTS EXPLAINED:
 
-http://localhost:5000/users
-METHODS: GET
-GET:
-    fetches all users in the Database with all country specific details fetched from the countries API and the additonal Identifier for the users in the regions of Europe and Asia.
+      http://localhost:5000/users
+      METHODS: GET
+      
+      GET:
+          fetches all users in the Database with all country specific details fetched from the countries API and the additonal Identifier for the users in the regions of Europe and Asia.
 
-   If pagination is required, then the offset and limit needs to be passed in the URL.
-    GET http://localhost:5000/users?limit=3&offset=0 - fetches first 3 user records
-    GET http://localhost:5000/users?limit=3&offset=3 - fetches next 3 user records and so on..
+      If pagination is required, then the offset and limit needs to be passed in the URL.
+         GET http://localhost:5000/users?limit=3&offset=0 - fetches first 3 user records
+         GET http://localhost:5000/users?limit=3&offset=3 - fetches next 3 user records and so on..
 
-   The GET request will fetch all countries from the countries API and cache it for 24 hours. SimpleCache from flask has been chosen to cache this data.  The country data doesnt look like changing always and hence the 24hrs timeout was chosen.
+      The GET request will fetch all countries from the countries API and cache it for 24 hours. SimpleCache from flask has been chosen to cache this data.  The country data doesnt look like changing always and hence the 24hrs timeout was chosen.
 
-   An option to force fetch the country information have been made and can be achieved by htting the following:
-    GET http://localhost:5000/users?refresh=true
+      An option to force fetch the country information have been made and can be achieved by htting the following:
+         GET http://localhost:5000/users?refresh=true
 
 AREAS OF IMPROVEMENT:
 
 1. Can use token based authentication to secure the API (JWT implementation. Couldn't do it due to shortage of time)
 2. Can use Redis for caching
+
+TESTS
+
+    Test scripts for functional and unit test have been added to the repository but could not work more on it due to limited time.
 
 
 
