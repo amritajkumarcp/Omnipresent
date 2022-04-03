@@ -1,0 +1,23 @@
+version: '2'
+
+services:
+  interface:
+    image: 'python:3.8-slim-buster'
+    build: .
+    command: "python3 -m flask run --host=0.0.0.0"
+    ports:
+      - target: 5000
+        published: 5000
+
+    networks:
+      - omni-net
+    volumes:
+      - type: volume
+        source: omni-vol
+        target: /python-docker
+  
+networks:
+  omni-net:
+
+volumes:
+  omni-vol:
