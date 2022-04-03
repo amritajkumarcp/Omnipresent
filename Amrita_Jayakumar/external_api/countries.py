@@ -14,6 +14,19 @@ cache = Cache(app, config={'CACHE_TYPE': 'SimpleCache'})
 
 COUNTRIES_API_URL = app.config.get("COUNTRIES_API_URL",[])
 
+
+
+class Country:
+  
+  def __init__(self, timezones, region, languages, currencies, country_official_name,cca2, cioc):
+    self.timezones = timezones
+    self.region = region
+    self.languages = languages
+    self.currencies = currencies
+    self.country_official_name = country_official_name
+    self.cca2 = cca2
+    self.cioc = cioc
+    
 @cache.cached(timeout=86400, query_string=True) # caching output for 24 Hours from the first hit.
 def get_all_countries(refresh=False):
     try:
@@ -24,7 +37,7 @@ def get_all_countries(refresh=False):
             data = response.read()
             countries = json.loads(data)
             
-            countries_list={}
+            countries_list=[]
             for country_data in countries:
                 cioc = country_data.get("cioc","")
                 cca2 = country_data.get("cca2","")
@@ -33,8 +46,8 @@ def get_all_countries(refresh=False):
                 languages = country_data.get("languages",{})
                 timezones = country_data.get("timezones",{})
                 region = country_data.get("region","")
-                country = {"country_official_name": country_name.get("official",""), "currencies": currencies, "languages":languages, "timezones": timezones, "region": region, "cca2": cca2}
-                countries_list[cioc]= country
+                country = Country(country_official_name= country_name.get("official",""), currencies= currencies, languages=languages, timezones=timezones, region = region, cca2= cca2, cioc=cioc)
+                countries_list.append(country)
 
             cache.set("countries",countries_list)
         

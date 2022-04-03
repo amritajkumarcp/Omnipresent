@@ -8,27 +8,32 @@ import logging
 log = logging.getLogger(__name__)
 
 # use decorators to link the function to a url
-@app.route('/')
+@app.route('/', methods = ['GET'])
 def home():
-   return  "<b>Omni API</b>"
-#    return render_template('index.html')  # return a string
-
-@app.route("/users",methods = ['GET','POST'])
-def manage_users():
-    user_params = {}
-    if request.args:
-        user_params = request.args.to_dict()
-    
     if request.method == 'GET':
-        users =  service.fetch_users(user_params)
-        if users.get("error", True) is False and len(users.get("users",[]))>0:
-            refresh_country_data = user_params.get("refresh",False)
-            users_sanitized = service.sanitize_user_list(users["users"], refresh_country_data)
-            if len(users_sanitized)>0:
-                users["users"] = users_sanitized
-        return users, 201
-    elif request.method == 'POST':
-        return service.add_user(user_params), 201
+        return  "<b>Omni API</b>", 200
     else:
-        return {"error":True, "message":"HTTP method not defined"}, 415
+        return "Method not allowed!", 405
+
+# specify HTTPS methods to differentiate between various HTTP methods.
+@app.route("/users",methods = ['GET'])
+def manage_users():
+    try:
+        user_params = {}
+        if request.args:
+            user_params = request.args.to_dict()
+        
+        if request.method == 'GET':
+            users =  service.fetch_users(user_params)
+            if users.get("error", True) is False and len(users.get("users",[]))>0:
+                refresh_country_data = user_params.get("refresh",False)
+                users_sanitized = service.sanitize_user_list(users["users"], refresh_country_data)
+                if len(users_sanitized)>0:
+                    users["users"] = users_sanitized
+            return users, 201
+        else:
+            return {"error":True, "message":"HTTP method not defined"}, 415
+    except Exception as e:
+        return {"error":True, "message":str(e)}, 500
+
 
