@@ -1,0 +1,36 @@
+version: '1'
+
+services:
+  interface:
+    image: 'python:3.8-slim-buster'
+    build: .
+    command: "python3 -m flask run --host=0.0.0.0"
+    ports:
+      - target: 5000
+        published: 5000
+    env_file:
+      - .env
+    networks:
+      - omni-net
+    volumes:
+      - type: volume
+        source: omni-vol
+        target: /python-docker
+    depends_on:
+      - omni_redis
+  redis:
+    image: 'redis:alpine'
+    command: redis-server
+    expose:
+      - '6379'
+    ports:
+      - '6379:6379'
+    networks:
+      - omni-net
+    container_name: redis-container
+
+networks:
+  omni-net:
+
+volumes:
+  omni-vol:
