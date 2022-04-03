@@ -14,11 +14,11 @@ cache = Cache(app, config={'CACHE_TYPE': 'SimpleCache'})
 
 COUNTRIES_API_URL = app.config.get("COUNTRIES_API_URL",[])
 
-@cache.cached(timeout=10, query_string=True)
+@cache.cached(timeout=86400, query_string=True) # caching output for 24 Hours from the first hit.
 def get_all_countries(refresh=False):
     try:
         countries_list = cache.get('countries')
-        if countries_list is None or refresh is True:
+        if countries_list is None or refresh is True: #if not cached or deliberate refresh required, then hit the countries API
             url = COUNTRIES_API_URL+"all"
             response = urllib.request.urlopen(url)
             data = response.read()
@@ -41,22 +41,18 @@ def get_all_countries(refresh=False):
         return {"error":False, "message":"Country data fetched successfully!","countries_list":countries_list}
 
     except Exception as e:
-        log.error(str(e))
         return {"error":True, "message":str(e),"countries_list":{}}
 
 def get_single_country(user):
     try:
         cioc = user.get("country","")
-        log.error("country_data cioc "+ cioc)
         if cioc:
             url = COUNTRIES_API_URL+f"alpha/{cioc.lower()}"
-            log.error("country_data url "+ url)
             response = urllib.request.urlopen(url)
             data = response.read()
             country_data = json.loads(data)
             if type(country_data) == list:
                 country_data = country_data[0]
-            log.error("country_data ", json.dumps(country_data))
             country_name = country_data.get("name",{})
             currencies = country_data.get("currencies",{})
             languages = country_data.get("languages",{})
@@ -72,6 +68,5 @@ def get_single_country(user):
             return {"error":True, "message":"Country code cannot be empty.","country_data":{}}
         
     except Exception as e:
-        log.error(str(e))
         return {"error":True, "message":str(e),"countries_list":{}}
 

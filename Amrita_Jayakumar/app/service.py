@@ -1,9 +1,7 @@
 from datetime import date
 import sqlite3, os, json
 from flask import g, jsonify
-
 from app import app
-
 from external_api import countries
 
 import logging
@@ -34,7 +32,6 @@ def get_db( rowbased_access=False):
                 db.row_factory = row_to_dict #sqlite3.Row
         return {"error": False, "message":"Connection Established Successfully","conn":db}
     except Exception as e:
-        log.error("get_db = "+str(e))
         return {"error": True, "message":str(e),"conn":None}
 
 def close_connection():
@@ -42,13 +39,8 @@ def close_connection():
     if db is not None:
         db.close()
 
-# Function version
-def row2dict(row):
-    return json.dumps(tuple(row))
-
 def fetch_users(params = {}):
     try:
-        log.error("params "+json.dumps(params))
         limit = params.get("limit","")
         offset = params.get("offset","")
         conn_response = get_db(True)
@@ -72,10 +64,50 @@ def fetch_users(params = {}):
     except Exception as e:
         return {"error": True, "message":str(e),"users":[]}
 
+def sanitize_user_list(users_list, refresh_country_data=False):
+    users_final=[]
+    if len(users_list)>0:
+        countries_list = countries.get_all_countries(refresh_country_data)
+        if countries_list.get("error", True) is False and len(countries_list)>0:
+            countries_list = countries_list.get("countries_list",{})
+        country_keys = list(countries_list.keys())
+
+        for user in users_list:
+            cioc = user.get("country","")
+            if countries_list and len(countries_list)>0:
+                country_specific_data = None
+                if cioc in country_keys:
+                    country_specific_data = countries_list.get(cioc,{})
+                
+                if country_specific_data is None or len(country_specific_data)<=0:
+                    country_specific_data = {}
+                    country_specific_data = countries.get_single_country(user)
+                    
+                    if country_specific_data.get("error", True) is False and len(country_specific_data)>0:
+                        country_specific_data = country_specific_data.get("country_data",{})
+
+                if country_specific_data is not None and len(country_specific_data)>0:
+
+                    region = country_specific_data.get("region","")
+                    
+                    if region in app.config.get("REGIONS",[]):
+                        firstName = user.get("firstName","")
+                        lastName = user.get("lastName","")
+                        dateOfBirth = user.get("dateOfBirth","")
+                        dateOfBirth = dateOfBirth.replace("/","")
+                        uid = ""
+                        if firstName and lastName and dateOfBirth:
+                            uid = f"{firstName.lower()}{lastName.lower()}{dateOfBirth}"
+                        country_specific_data["uid"] = uid
+
+                
+            user.update(country_specific_data)
+            users_final.append(user)
+    return users_final
+    
 def add_user(params={}):
     try:
         users = params.get("users",[])
-        log.error(json.dumps(users))
         conn_response = get_db()
         resp=None
         if conn_response.get("error",False):
