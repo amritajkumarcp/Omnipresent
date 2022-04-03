@@ -59,13 +59,13 @@ FOLDER STRUCTURE EXPLAINED
 
    config.py
 
-        Contains all configurables that are used in the application. 
+        Contains all configurables that are used in the application. Have separate configuration available for each environment like DEV, PRODUCTION tESTING etc which can beustilized accordingly.
         
         DATABASE_URI, REGIONS, COUNTRIES_API_URL, CACHE_TYPE, CACHE_DEFAULT_TIMEOUT have been added to the config files and each configuration have been named to be self explanatory.
 
         The regions which require additional identifier for a user has been configured here as a list so that there is a provision to add more of such regions that might need this extra identifier in the future can be added here. The key for the additional identifier in the return json will be "uid".
 
-    Dockerfile Explained:
+   Dockerfile Explained:
 
         FROM python:3.8-alpine : Docker allows us to inherit existing images and hence we can reuse a Python image and install it in our Docker image. Alpine is a lightweight Linux distro that will serve as the OS on which we install our image
 
