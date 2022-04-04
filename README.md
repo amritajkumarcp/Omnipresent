@@ -130,6 +130,7 @@ API ENDPOINTS EXPLAINED:
       
       GET:
           fetches all users in the Database with all country specific details fetched from the countries API and the additonal Identifier for the users in the regions of Europe and Asia.
+          The database used is SQLite as it works well with most low to medium traffic databases. Any API that gets a fewer than 100k requests per day will work well with SQLite
 
       If pagination is required, then the offset and limit needs to be passed in the URL.
          GET http://localhost:5000/users?limit=3&offset=0 - fetches first 3 user records
@@ -142,12 +143,12 @@ API ENDPOINTS EXPLAINED:
 
 AREAS OF IMPROVEMENT:
 
-1. Can use token based authentication to secure the API (JWT implementation. Couldn't do it due to shortage of time)
+1. Can use token based authentication to secure the API (JWT implementation. Couldn't do it due to constraints of time)
 2. Can use Redis for caching
 
 TESTS
 
-    Test scripts for functional and unit test have been added to the repository but could not work more on it due to limited time.
+    Test scripts for functional and unit test have been added to the repository but could not work more on it due to constraints of time.
 
 
 
